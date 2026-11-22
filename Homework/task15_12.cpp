@@ -1,152 +1,51 @@
-﻿#include <iostream>
-#include <fstream>
-using namespace std;
+#include "Vector.h"
+#include <iostream>
 
-class Vector
-{
-private:
-    double* elements;
-    int size;
+int main() {
+    int firstSize;
+    int secondSize;
 
-public:
-    // Конструктор
-    Vector(int n)
-    {
-        size = n;
-        elements = new double[size];
+    std::cout << "Vvedit kilkist elementiv pershoho vektora: ";
+    std::cin >> firstSize;
 
-        for (int i = 0; i < size; i++)
-            elements[i] = 0;
-    }
+    std::cout << "Vvedit kilkist elementiv druhoho vektora: ";
+    std::cin >> secondSize;
 
-    // Конструктор копіювання
-    Vector(const Vector& other)
-    {
-        size = other.size;
-        elements = new double[size];
-
-        for (int i = 0; i < size; i++)
-            elements[i] = other.elements[i];
-    }
-
-    // Деструктор
-    ~Vector()
-    {
-        delete[] elements;
-    }
-
-    void setElement(int index, double value)
-    {
-        if (index >= 0 && index < size)
-            elements[index] = value;
-    }
-
-    double getElement(int index)
-    {
-        if (index >= 0 && index < size)
-            return elements[index];
-
+    if (firstSize <= 0 || secondSize <= 0) {
+        std::cout << "Rozmir vektora povynen buty dodatnym.\n";
         return 0;
     }
 
-    int getSize()
-    {
-        return size;
-    }
+    Vector first(firstSize);
+    Vector second(secondSize);
 
-    // Скалярний добуток
-    bool scalarProduct(const Vector& other, double& result)
-    {
-        if (size != other.size)
-            return false;
+    std::cout << "Vvedit pershyi vektor:\n";
+    std::cin >> first;
 
-        result = 0;
-
-        for (int i = 0; i < size; i++)
-            result += elements[i] * other.elements[i];
-
-        return true;
-    }
-
-    // Добуток векторів-коефіцієнтів поліномів
-    Vector multiply(const Vector& other)
-    {
-        Vector result(size + other.size - 1);
-
-        for (int i = 0; i < size; i++)
-        {
-            for (int j = 0; j < other.size; j++)
-            {
-                result.elements[i + j] += elements[i] * other.elements[j];
-            }
-        }
-
-        return result;
-    }
-
-    void writeToFile(const char* filename)
-    {
-        ofstream file(filename);
-
-        if (!file)
-        {
-            cout << "Не вдалося відкрити файл!" << endl;
-            return;
-        }
-
-        for (int i = 0; i < size; i++)
-            file << elements[i] << " ";
-
-        file.close();
-    }
-};
-
-int main()
-{
-    int m, n;
-
-    cout << "Введіть степінь першого полінома m: ";
-    cin >> m;
-
-    cout << "Введіть степінь другого полінома n: ";
-    cin >> n;
-
-    if (m < 0 || n < 0)
-    {
-        cout << "Степені не можуть бути від'ємними!" << endl;
-        return 0;
-    }
-
-    Vector a(m + 1);
-    Vector b(n + 1);
-
-    cout << "Введіть коефіцієнти першого вектора:" << endl;
-    for (int i = 0; i <= m; i++)
-    {
-        double x;
-        cin >> x;
-        a.setElement(i, x);
-    }
-
-    cout << "Введіть коефіцієнти другого вектора:" << endl;
-    for (int i = 0; i <= n; i++)
-    {
-        double x;
-        cin >> x;
-        b.setElement(i, x);
-    }
+    std::cout << "Vvedit druhyi vektor:\n";
+    std::cin >> second;
 
     double scalar;
+    if (first.scalarProduct(second, scalar)) {
+        std::cout << "Skalyarnyi dobutok: " << scalar << '\n';
+    } else {
+        std::cout << "Skalyarnyi dobutok nemozhlyvyi: rizni rozmiry.\n";
+    }
 
-    if (a.scalarProduct(b, scalar))
-        cout << "Скалярний добуток: " << scalar << endl;
-    else
-        cout << "Скалярний добуток неможливий: розміри векторів різні." << endl;
+    Vector product = first.multiply(second);
+    std::cout << "Dobutok koefitsiientiv: " << product << '\n';
 
-    Vector result = a.multiply(b);
-    result.writeToFile("result.txt");
+    if (!product.writeToFile("result.txt")) {
+        std::cout << "Ne vdalosia vidkryty result.txt\n";
+        return 1;
+    }
 
-    cout << "Вектор добутку записано у файл result.txt" << endl;
+    Vector fromFile(product.getSize());
+    if (!fromFile.readFromFile("result.txt")) {
+        std::cout << "Ne vdalosia prochytaty result.txt\n";
+        return 1;
+    }
 
+    std::cout << "Prochytano z result.txt: " << fromFile << '\n';
     return 0;
 }
